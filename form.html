@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML Form Example</title>
+</head>
+<body>
+
+    <!-- Form starts -->
+    <form >
+
+        <!-- Text Input -->
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name">
+        <br><br>
+
+        <!-- Email Input -->
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email">
+        <br><br>
+
+        <!-- Password Input -->
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br><br>
+
+        <!-- Radio Buttons -->
+        <label>Gender:</label>
+
+        <input type="radio" id="male" name="gender" value="Male">
+        <label for="male">Male</label>
+
+        <input type="radio" id="female" name="gender" value="Female">
+        <label for="female">Female</label>
+        <br><br>
+
+        <!-- Checkboxes -->
+        <label>Skills:</label>
+
+        <input type="checkbox" id="html" name="skills" value="HTML">
+        <label for="html">HTML</label>
+
+        <input type="checkbox" id="css" name="skills" value="CSS">
+        <label for="css">CSS</label>
+
+        <input type="checkbox" id="js" name="skills" value="JavaScript">
+        <label for="js">JavaScript</label>
+        <br><br>
+
+        <!-- Dropdown List -->
+        <label for="course">Course:</label>
+        <select id="course" name="course">
+            <option value="">Select Course</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="javascript">JavaScript</option>
+        </select>
+        <br><br>
+
+        <!-- Text Area -->
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="30"></textarea>
+        <br><br>
+
+        <!-- Submit Button -->
+        <input type="submit" value="Submit">
+
+        <!-- Reset Button -->
+        <input type="reset" value="Reset">
+
+    </form>
+    <!-- Form ends -->
+
+</body>
+</html>
