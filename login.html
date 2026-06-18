@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+
+    <style>
+        /* Remove default spacing */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Center the login box on the page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+
+            /* Flexbox for centering */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* Full screen height */
+            height: 100vh;
+        }
+
+        /* Login container */
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heading */
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Input fields */
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Login button */
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Button hover effect */
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Footer text */
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register-link a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Box -->
+    <div class="login-container">
+
+        <!-- Page Title -->
+        <h2>Login</h2>
+
+        <!-- Login Form -->
+        <form>
+
+            <!-- Email Field -->
+            <label for="email">Email</label>
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                required
+            >
+
+            <!-- Password Field -->
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+            >
+
+            <!-- Login Button -->
+            <button type="submit">Login</button>
+
+        </form>
+
+        <!-- Register Link -->
+        <div class="register-link">
+            Don't have an account?
+            <a href="#">Register</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
