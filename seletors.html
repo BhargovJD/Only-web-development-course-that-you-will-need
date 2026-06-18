@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Selectors Demo</title>
+
+    <style>
+        /* ==========================================
+           1. Universal Selector (*)
+           Selects all elements
+        ========================================== */
+        * {
+            font-family: Arial, sans-serif;
+        }
+
+        /* ==========================================
+           2. Element Selector
+           Selects all h1 tags
+        ========================================== */
+        h1 {
+            color: blue;
+        }
+
+        /* ==========================================
+           3. Class Selector (.classname)
+           Selects elements with class="info"
+        ========================================== */
+        .info {
+            color: green;
+        }
+
+        /* ==========================================
+           4. ID Selector (#id)
+           Selects element with id="main-title"
+        ========================================== */
+        #main-title {
+            text-decoration: underline;
+        }
+
+        /* ==========================================
+           5. Group Selector (,)
+           Selects both h2 and h3
+        ========================================== */
+        h2, h3 {
+            color: purple;
+        }
+
+        /* ==========================================
+           6. Descendant Selector (space)
+           Selects p inside .container
+        ========================================== */
+        .container p {
+            background-color: #f0f0f0;
+            padding: 5px;
+        }
+
+        /* ==========================================
+           7. Child Selector (>)
+           Selects direct child p of .parent
+        ========================================== */
+        .parent > p {
+            border: 2px solid red;
+        }
+
+        /* ==========================================
+           8. Adjacent Sibling Selector (+)
+           Selects first p immediately after h4
+        ========================================== */
+        h4 + p {
+            color: orange;
+        }
+
+        /* ==========================================
+           9. General Sibling Selector (~)
+           Selects all p after h5
+        ========================================== */
+        h5 ~ p {
+            color: brown;
+        }
+
+        /* ==========================================
+           10. Attribute Selector ([ ])
+           Selects password input
+        ========================================== */
+        input[type="password"] {
+            border: 2px solid red;
+        }
+
+        /* ==========================================
+           11. Pseudo-Class Selector (:hover)
+           Changes button color on hover
+        ========================================== */
+        button:hover {
+            background-color: black;
+            color: white;
+        }
+
+        /* ==========================================
+           12. Pseudo-Element Selector (::first-letter)
+           Styles first letter
+        ========================================== */
+        .first-letter-demo::first-letter {
+            font-size: 30px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="main-title">CSS Selectors Example</h1>
+
+    <hr>
+
+    <!-- Class Selector -->
+    <h2>Class Selector Example</h2>
+    <p class="info">This paragraph uses the .info class.</p>
+
+    <hr>
+
+    <!-- Descendant Selector -->
+    <h2>Descendant Selector Example</h2>
+    <div class="container">
+        <p>This paragraph is inside .container.</p>
+    </div>
+
+    <hr>
+
+    <!-- Child Selector -->
+    <h2>Child Selector Example</h2>
+    <div class="parent">
+        <p>Direct child paragraph.</p>
+
+        <div>
+            <p>Nested paragraph (not a direct child).</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Adjacent Sibling Selector -->
+    <h2>Adjacent Sibling Selector Example</h2>
+    <h4>Heading 4</h4>
+    <p>This paragraph is immediately after h4.</p>
+    <p>This paragraph is not selected.</p>
+
+    <hr>
+
+    <!-- General Sibling Selector -->
+    <h2>General Sibling Selector Example</h2>
+    <h5>Heading 5</h5>
+    <p>Paragraph 1 after h5.</p>
+    <p>Paragraph 2 after h5.</p>
+
+    <hr>
+
+    <!-- Attribute Selector -->
+    <h2>Attribute Selector Example</h2>
+    <input type="text" placeholder="Username">
+    <br><br>
+    <input type="password" placeholder="Password">
+
+    <hr>
+
+    <!-- Pseudo-Class Selector -->
+    <h2>Pseudo-Class Selector Example</h2>
+    <button>Hover Over Me</button>
+
+    <hr>
+
+    <!-- Pseudo-Element Selector -->
+    <h2>Pseudo-Element Selector Example</h2>
+    <p class="first-letter-demo">
+        This paragraph demonstrates the ::first-letter pseudo-element.
+    </p>
+
+</body>
+</html>
