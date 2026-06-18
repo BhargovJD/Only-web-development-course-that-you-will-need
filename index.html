@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 Ways to Add CSS</title>
+
+    <!-- ===================================================== -->
+    <!-- 1. INTERNAL CSS                                       -->
+    <!-- CSS is written inside the <style> tag in the <head>   -->
+    <!-- This CSS affects all matching elements on this page   -->
+    <!-- ===================================================== -->
+    <style>
+        h1 {
+            color: blue;
+            text-align: center;
+        }
+
+        .internal-box {
+            background-color: lightyellow;
+            border: 2px solid orange;
+            padding: 10px;
+        }
+    </style>
+
+    <!-- ===================================================== -->
+    <!-- 2. EXTERNAL CSS                                       -->
+    <!-- CSS is stored in a separate file (style.css)          -->
+    <!-- Best method for large projects                        -->
+    <!-- ===================================================== -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ===================================================== -->
+    <!-- INTERNAL CSS EXAMPLE                                  -->
+    <!-- h1 and .internal-box styles come from <style> tag     -->
+    <!-- ===================================================== -->
+    <h1>Internal CSS Example</h1>
+
+    <div class="internal-box">
+        This box is styled using Internal CSS.
+    </div>
+
+    <br>
+
+    <!-- ===================================================== -->
+    <!-- 3. INLINE CSS                                         -->
+    <!-- CSS is written directly inside the HTML element       -->
+    <!-- Only affects this specific element                    -->
+    <!-- ===================================================== -->
+    <p style="color: red; font-size: 20px; font-weight: bold;">
+        This paragraph is styled using Inline CSS.
+    </p>
+
+    <br>
+
+    <!-- ===================================================== -->
+    <!-- EXTERNAL CSS EXAMPLE                                  -->
+    <!-- Style comes from style.css file                       -->
+    <!-- ===================================================== -->
+    <button class="external-btn">
+        External CSS Button
+    </button>
+
+</body>
+</html>
