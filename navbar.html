@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Character encoding -->
+    <meta charset="UTF-8">
+
+    <!-- Makes the page responsive on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Browser tab title -->
+    <title>Navigation Menu</title>
+
+    <style>
+        /* Page styling */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin-top: 0;
+            padding: 20px;
+            background-color: burlywood;
+        }
+
+        /* Remove default bullet points */
+        .nav1 ul {
+            list-style-type: none;
+
+            /* Arrange items horizontally */
+            display: flex;
+
+            /* Equal spacing between items */
+            justify-content: space-around;
+
+            /* Remove default padding */
+            padding: 0;
+        }
+
+        /* Style for links */
+        .nav1 a {
+            text-decoration: none;   /* Remove underline */
+            color: black;
+            font-size: 18px;
+
+            /* Needed for absolute positioning of ::after */
+            position: relative;
+        }
+
+        /* Create hidden underline */
+        .nav1 a::after {
+            content: "ABC";             /* Empty content */
+
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+
+            width: 100%;
+            height: 2px;
+
+            background-color: blue;
+
+            /* Hide underline initially */
+            transform: scaleX(0);
+
+            /* Animate the underline */
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Show underline on hover */
+        .nav1 a:hover::after {
+            transform: scaleX(1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav-container">
+
+        <!-- Heading -->
+        <h1>Variation 1: Horizontal with Underline Effect</h1>
+
+        <!-- Navigation section -->
+        <nav class="nav1">
+
+            <ul>
+                <li><a href="#">Home</a></li>
+
+                <li><a href="#">About</a></li>
+
+                <li><a href="#">Products</a></li>
+
+                <li><a href="#">Login</a></li>
+            </ul>
+
+        </nav>
+
+    </div>
+
+</body>
+
+</html>
