@@ -1,0 +1,42 @@
+1. Create table
+CREATE TABLE chai_store (
+    id BIGSERIAL PRIMARY KEY,
+    chai_name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    chai_type VARCHAR(100) NOT NULL,
+    available BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+2. Insert data
+INSERT INTO chai_store (chai_name, price, chai_type, available)
+VALUES
+    ('Masala Chai', 30.00, 'Milk Tea', TRUE),
+    ('Ginger Chai', 25.00, 'Milk Tea', TRUE),
+    ('Cardamom Chai', 35.00, 'Milk Tea', TRUE),
+    ('Lemon Tea', 20.00, 'Black Tea', TRUE),
+    ('Green Tea', 40.00, 'Green Tea', TRUE),
+    ('Tulsi Chai', 30.00, 'Herbal Tea', TRUE),
+    ('Elaichi Chai', 35.00, 'Milk Tea', FALSE);
+
+3. Show
+SELECT * FROM public.chai_store
+ORDER BY id ASC 
+
+4. Specific 
+SELECT chai_name AS "Chai Name", price AS "Price in INR" FROM public.chai_store
+ORDER BY id ASC
+
+5. Search
+SELECT * FROM public.chai_store WHERE chai_name = 'Green Tea'
+ORDER BY id ASC 
+
+6. Like
+SELECT * FROM public.chai_store WHERE  chai_name LIKE '%Tea%'
+ORDER BY id ASC 
+
+7. Condition
+SELECT * FROM public.chai_store WHERE  price < 30;
+
+8. ORDER BY
+SELECT * FROM chai_store  ORDER BY price DESC;
+
