@@ -45,3 +45,9 @@ UPDATE chai_store SET price = 10.00, available = true  WHERE chai_name = 'Elaich
 
 10. Delete
 DELETE 	FROM chai_store WHERE chai_name = 'Elaichi Chai'
+
+9. Update
+UPDATE chai_store SET price = 10.00, available = true  WHERE chai_name = 'Elaichi Chai'
+
+10. Delete
+DELETE 	FROM chai_store WHERE chai_name = 'Elaichi Chai'
