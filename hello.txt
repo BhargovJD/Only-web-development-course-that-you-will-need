@@ -1,1 +1,2 @@
 Only web development course that you will need
+SQL
