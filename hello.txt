@@ -1,1 +1,9 @@
 Only web development course that you will need
+
+Containering a node app
+npm init -y
+npm install express
+
+
+docker build -t express-app .
+docker run -p 4000:3000 -e PORT=3000 --rm express-app

@@ -1,0 +1,24 @@
+{
+  "name": "webdev",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/BhargovJD/Only-web-development-course-that-you-will-need#readme",
+  "bugs": {
+    "url": "https://github.com/BhargovJD/Only-web-development-course-that-you-will-need/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BhargovJD/Only-web-development-course-that-you-will-need.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
