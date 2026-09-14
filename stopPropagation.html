@@ -1,0 +1,30 @@
+<!-- stopPropagation() is a JavaScript method used with events to stop an event from moving (propagating) from one element to another. -->
+ <div id="parent">
+    <button id="child">Click Me</button>
+</div>
+
+
+<script>
+const parent = document.getElementById('parent');
+const child = document.getElementById('child');
+
+parent.addEventListener('click', () => {
+    console.log('Parent clicked');
+});
+
+// child.addEventListener('click', () => {
+//     console.log('Button clicked');
+// });
+
+child.addEventListener('click', (event) => {
+    event.stopPropagation();
+
+    console.log('Button clicked');
+});
+</script>
+
+
+<!-- Because the button is inside the <div>. The click event happens on the button and then bubbles up to its parent.
+
+This is called event bubbling. -->
+<!-- "Stop this event here. Don't let it travel to the parent." -->
