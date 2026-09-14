@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save the updated todos array into localStorage
         saveTodos();
+        renderTodo(newTodo);
 
         // Clear the input field after adding the todo
         newTodoInput.value = '';
