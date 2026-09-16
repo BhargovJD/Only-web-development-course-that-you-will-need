@@ -1,121 +1,102 @@
-// Wait until the entire HTML document has been loaded before running the code
-document.addEventListener('DOMContentLoaded', () => {
+// Run the code after the HTML page has completely loaded
+document.addEventListener('DOMContentLoaded', function () {
 
-    // Get the input element where the user enters a new todo
-    const newTodoInput = document.getElementById('new-todo');
+    // Get HTML elements
+    const cityInput = document.getElementById('city-input');
+    const getWeatherBtn = document.getElementById('get-weather-button');
 
-    // Get the button that will be used to add a new todo
-    const addTodoButton = document.getElementById('add-todo');
+    const weatherInfo = document.getElementById('weatherInfo');
+    const cityNameDisplay = document.getElementById('city-name');
+    const temperatureDisplay = document.getElementById('temperature');
+    const descriptionDisplay = document.getElementById('description');
+    const errorMessage = document.getElementById('error-message');
 
-    // Get the HTML element where the todo items will be displayed
-    const todoList = document.getElementById('todo-list');
+    // API key
+    const apiKey = '0a9819b31ef6582b4c8ffdc99761411c';
 
-    // Check if there is already a "todos" item stored in localStorage
-    // If it exists:
-    //     - Get the stored value using localStorage.getItem('todos')
-    //     - Convert the JSON string back into a JavaScript array using JSON.parse()
-    //
-    // If it does not exist:
-    //     - Create an empty array []
-    let todos = localStorage.getItem('todos')
-        ? JSON.parse(localStorage.getItem('todos'))
-        : [];
 
-    // Loop through all existing todos
-    // For each todo, call the renderTodo() function
-    todos.forEach((todo) => renderTodo(todo));
+    // When the button is clicked
+    getWeatherBtn.addEventListener('click', async function () {
 
-    // Add a click event listener to the Add Todo button
-    // This function will run whenever the button is clicked
-    addTodoButton.addEventListener('click', () => {
+        // Get city name from input
+        const city = cityInput.value.trim();
 
-        // Get the value entered in the input field
-        // trim() removes extra spaces from the beginning and end
-        const newTodoText = newTodoInput.value.trim();
-
-        // Check whether the input is empty
-        // If it is empty, stop the function using return
-        if (newTodoText === '') {
+        // If input is empty, stop
+        if (!city) {
             return;
         }
 
-        // Create a new todo object
-        const newTodo = {
+        try {
 
-            // Create a unique ID using the current timestamp
-            id: Date.now(),
+            // Get weather data
+            const weatherData = await fetchWeatherData(city);
 
-            // Store the text entered by the user
-            text: newTodoText,
+            // Display weather data
+            displayWeatherData(weatherData);
 
-            // Set the initial completed status to false
-            // This means the todo is not completed yet
-            completed: false
-        };
+        } catch (error) {
 
-        // Add the newly created todo object to the todos array
-        todos.push(newTodo);
-
-        // Save the updated todos array into localStorage
-        saveTodos();
-        renderTodo(newTodo);
-
-        // Clear the input field after adding the todo
-        newTodoInput.value = '';
-
-        // Display the current todos array in the browser console
-        console.log(todos);
+            // Display error
+            displayError(error.message);
+        }
     });
 
-    // This function is responsible for displaying a todo
-    // on the webpage
-    function renderTodo(todo) {
-        // Create the <li> element
-        const listItem = document.createElement('li');
 
-        // Create the span for todo text
-        const todoText = document.createElement('span');
-        todoText.className = 'todo-text';
-        todoText.textContent = todo.text;
+    // Get weather data from API
+    async function fetchWeatherData(city) {
 
-        // Create the Delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete-button';
-        deleteButton.textContent = 'Delete';
-        deleteButton.type = 'button';
-        
+        const apiUrl =
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
-        // Add click event to Delete button
-        deleteButton.addEventListener('click', () => {
-            // Remove the todo from the todos array
-            todos = todos.filter((item) => item.id !== todo.id);
+        // Send request to API
+        const response = await fetch(apiUrl);
 
-            // Save the updated array to localStorage
-            saveTodos();
+        console.log(typeof response); // Log the response for debugging
+        console.log("RESPONSE", response); // Log the response status for debugging
 
-            // Remove the <li> from the webpage
-            listItem.remove();
+        // Check if city was found
+        if (!response.ok) {
+            throw new Error('City not found');
+        }
 
-            // Display updated todos in console
-            console.log(todos);
-        });
+        // Convert response into JSON
+        const data = await response.json();
 
-        // Add text and button to the <li>
-        listItem.appendChild(todoText);
-        listItem.appendChild(deleteButton);
-
-        // Add the <li> to the <ul>
-        todoList.appendChild(listItem);
+        // Return weather data
+        return data;
     }
 
-    // This function saves the todos array into localStorage
-    function saveTodos() {
 
-        // localStorage can only store strings
-        // Therefore, JSON.stringify() converts the todos array
-        // into a JSON string before storing it
-        localStorage.setItem('todos', JSON.stringify(todos));
+    // Display weather data
+    function displayWeatherData(data) {
+        // console.log("DATA", data); // Log the data for debugging
+
+        cityNameDisplay.textContent = data.name;
+
+        temperatureDisplay.textContent =
+            `Temperature: ${data.main.temp}°C`;
+
+        descriptionDisplay.textContent =
+            `Weather: ${data.weather[0].description}`;
+
+        // Show weather information
+        weatherInfo.style.display = 'block';
+
+        // Hide error message
+        errorMessage.style.display = 'none';
     }
 
-    // Close the DOMContentLoaded event listener
+
+    // Display error
+    function displayError(message) {
+
+        errorMessage.textContent = message;
+
+        // Show error message
+        errorMessage.style.display = 'block';
+
+        // Hide weather information
+        weatherInfo.style.display = 'none';
+    }
+
 });

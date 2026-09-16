@@ -1,93 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo App</title>
-    <style>
-      * { box-sizing: border-box; }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>Weather App</h1>
+  <input type="text" id="city-input" placeholder="Enter city name">
+  <button id="get-weather-button">Click Me</button>
+  <div id="weatherInfo" style="display: none;">
+    <h2 id="city-name"></h2>
+    <p id="temperature"></p>
+    <p id="description"></p>
+  </div>
 
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        font-family: Arial, sans-serif;
-        background: #f4f7fb;
-        color: #1f2937;
-      }
+  <p id="error-message" style="color: red; display: none;">
+    
+  </p>
 
-      .todo-app {
-        width: min(100%, 500px);
-        padding: 32px;
-        border-radius: 16px;
-        background: #ffffff;
-        box-shadow: 0 12px 30px rgba(31, 41, 55, 0.12);
-      }
 
-      h1 { margin: 0 0 8px; }
-      .subtitle { margin: 0 0 24px; color: #6b7280; }
-
-      .add-todo {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 24px;
-      }
-
-      input {
-        flex: 1;
-        min-width: 0;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font: inherit;
-      }
-
-      button {
-        border: 0;
-        border-radius: 8px;
-        padding: 12px 16px;
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .add-button { background: #2563eb; color: #ffffff; }
-      .delete-button { background: #fee2e2; color: #b91c1c; }
-
-      ul { margin: 0; padding: 0; list-style: none; }
-
-      li {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 0;
-        border-bottom: 1px solid #e5e7eb;
-      }
-
-      li:last-child { border-bottom: 0; }
-      .todo-text { flex: 1; }
-
-      @media (max-width: 420px) {
-        .todo-app { padding: 24px; }
-        .add-todo { flex-direction: column; }
-      }
-    </style>
-
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <main class="todo-app">
-      <h1>My Todos</h1>
-      <p class="subtitle">Keep track of what needs to get done.</p>
-
-        <input id="new-todo" type="text" placeholder="Add a new todo..." aria-label="New todo" />
-        <button id="add-todo" class="add-button" type="submit">Add</button>
-
-      <ul id="todo-list" aria-label="Todo list">
-      
-      </ul>
-    </main>
-  </body>
+  <script src="script.js"></script>
+  
+</body>
 </html>
