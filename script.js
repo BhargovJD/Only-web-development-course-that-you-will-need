@@ -1,102 +1,92 @@
-// Run the code after the HTML page has completely loaded
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Get HTML elements
-    const cityInput = document.getElementById('city-input');
-    const getWeatherBtn = document.getElementById('get-weather-button');
+    const products = [
+        { id: 1, name: 'Product 1', price: 10.00 },
+        { id: 2, name: 'Product 2', price: 15.00 },
+        { id: 3, name: 'Product 3', price: 20.00 },
+        { id: 4, name: 'Product 4', price: 25.00 }
+    ];
 
-    const weatherInfo = document.getElementById('weatherInfo');
-    const cityNameDisplay = document.getElementById('city-name');
-    const temperatureDisplay = document.getElementById('temperature');
-    const descriptionDisplay = document.getElementById('description');
-    const errorMessage = document.getElementById('error-message');
+    const cart = [];
 
-    // API key
-    const apiKey = '0a9819b31ef6582b4c8ffdc99761411c';
+    const productList = document.getElementById('product-list');
+    const cartItems = document.getElementById('cart-items');
+    const emptyCartMessage = document.getElementById('empty-cart');
+    const cartTotalMessage = document.getElementById('cart-total');
+    const totalPriceDisplay = document.getElementById('total-price');
+    const checkoutButton = document.getElementById('checkout-btn');
 
 
-    // When the button is clicked
-    getWeatherBtn.addEventListener('click', async function () {
+    products.forEach(product => {
+        const productDiv = document.createElement('div');
+        productDiv.classList.add('product');
+        productDiv.innerHTML = `
+            <h3>${product.name}</h3>
+            <p>Price: $${product.price.toFixed(2)}</p>
+            <button data-id="${product.id}">Add to Cart</button>
+        `;
+        productList.appendChild(productDiv);
+    });
 
-        // Get city name from input
-        const city = cityInput.value.trim();
 
-        // If input is empty, stop
-        if (!city) {
-            return;
-        }
-
-        try {
-
-            // Get weather data
-            const weatherData = await fetchWeatherData(city);
-
-            // Display weather data
-            displayWeatherData(weatherData);
-
-        } catch (error) {
-
-            // Display error
-            displayError(error.message);
+    productList.addEventListener('click', function (event) {
+        if (event.target.tagName === 'BUTTON') {
+            // console.log('Button clicked');
+            // console.log(event.target.getAttribute('data-id'));
+            const productId = parseInt(event.target.getAttribute('data-id'));
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                // console.log('Adding to cart:', product);
+                addToCart(product);
+            }
         }
     });
 
 
-    // Get weather data from API
-    async function fetchWeatherData(city) {
+    function addToCart(product) {
+        cart.push(product);
+        // console.log('Cart:', cart);
+        renderCart();
+    }
 
-        const apiUrl =
-            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    function renderCart() {
+        cartItems.innerHTML = '';
 
-        // Send request to API
-        const response = await fetch(apiUrl);
+        let totalPrice = 0;
+        if(cart.length>0) {
+            emptyCartMessage.classList.add('hidden');
+            cartTotalMessage.classList.remove('hidden');
 
-        console.log(typeof response); // Log the response for debugging
-        console.log("RESPONSE", response); // Log the response status for debugging
+            cart.forEach((item, index) => {
+                totalPrice += item.price;
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.innerHTML = `
+                ${item.name} - $${item.price.toFixed(2)}
+                `;
+                cartItems.appendChild(cartItemDiv);
 
-        // Check if city was found
-        if (!response.ok) {
-            throw new Error('City not found');
+
+
+            });
+            totalPriceDisplay.textContent = `$${totalPrice.toFixed(2)}`;
+        }else{
+            emptyCartMessage.classList.add('hidden');
+            totalPriceDisplay.textContent = `$${0.00.toFixed(2)}`;
+            
         }
 
-        // Convert response into JSON
-        const data = await response.json();
-
-        // Return weather data
-        return data;
     }
 
 
-    // Display weather data
-    function displayWeatherData(data) {
-        // console.log("DATA", data); // Log the data for debugging
 
-        cityNameDisplay.textContent = data.name;
-
-        temperatureDisplay.textContent =
-            `Temperature: ${data.main.temp}°C`;
-
-        descriptionDisplay.textContent =
-            `Weather: ${data.weather[0].description}`;
-
-        // Show weather information
-        weatherInfo.style.display = 'block';
-
-        // Hide error message
-        errorMessage.style.display = 'none';
-    }
+checkoutButton.addEventListener('click', function () {
+    cart.length = 0; // Clear the cart
+    alert('Thank you for your purchase!');
+    renderCart();
+})
 
 
-    // Display error
-    function displayError(message) {
 
-        errorMessage.textContent = message;
 
-        // Show error message
-        errorMessage.style.display = 'block';
 
-        // Hide weather information
-        weatherInfo.style.display = 'none';
-    }
-
-});
+})
