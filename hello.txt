@@ -8,3 +8,5 @@ npm run dev
 Change in package.json
     "type": "module"
 /////////////////////
+npm install --save-dev --save-exact prettier
+npx prettier . --write

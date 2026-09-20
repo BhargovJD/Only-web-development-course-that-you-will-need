@@ -1,0 +1,15 @@
+{
+    "tabWidth": 4,              // Number of spaces used for each indentation level
+
+    "useTabs": false,            // Use spaces instead of Tab characters for indentation
+
+    "semi": true,                // Add semicolon (;) at the end of JavaScript statements
+
+    "singleQuote": false,        // Use double quotes "hello" instead of single quotes 'hello'
+
+    "trailingComma": "all",      // Add trailing commas wherever possible
+
+    "bracketSpacing": true,      // Add spaces inside object brackets: { name: "John" }
+
+    "arrowParens": "always"      // Always use parentheses around arrow function parameters
+}
