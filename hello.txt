@@ -17,3 +17,6 @@ Changes in package.json
     "start": "node index.js"
 npm run dev
 /////////////////////
+npm i dotenv
+create .env file
+add this file in entry point of project (here index.js)
