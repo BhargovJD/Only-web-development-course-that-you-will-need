@@ -1,0 +1,25 @@
+{
+  "name": "projectmanagement",
+  "version": "1.0.0",
+  "description": "a project management application",
+  "keywords": [
+    "bacekend",
+    "api"
+  ],
+  "homepage": "https://github.com/BhargovJD/Only-web-development-course-that-you-will-need#readme",
+  "bugs": {
+    "url": "https://github.com/BhargovJD/Only-web-development-course-that-you-will-need/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BhargovJD/Only-web-development-course-that-you-will-need.git"
+  },
+  "license": "ISC",
+  "author": "bhargov",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js"
+  }
+}

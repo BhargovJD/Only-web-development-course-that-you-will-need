@@ -1,1 +1,10 @@
-Only web development course that you will need
+/////////////////////
+npm init
+create index.js 
+node index.js
+Change in package.json
+    "dev": "node index.js"
+npm run dev
+Change in package.json
+    "type": "module"
+/////////////////////
