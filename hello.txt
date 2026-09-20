@@ -10,3 +10,10 @@ Change in package.json
 /////////////////////
 npm install --save-dev --save-exact prettier
 npx prettier . --write
+/////////////////////
+npm install --save-dev nodemon
+Changes in package.json
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+npm run dev
+/////////////////////
