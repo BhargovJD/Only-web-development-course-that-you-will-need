@@ -20,3 +20,7 @@ npm run dev
 npm i dotenv
 create .env file
 add this file in entry point of project (here index.js)
+//////////////////////////////
+Express
+npm install express 
+//////////////////////////////
