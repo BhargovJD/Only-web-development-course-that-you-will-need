@@ -24,3 +24,5 @@ add this file in entry point of project (here index.js)
 Express
 npm install express 
 //////////////////////////////
+CORS:
+npm i cors
