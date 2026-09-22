@@ -29,3 +29,9 @@ npm i cors
 /////////////////////////////
 MONGOOSE:
 npm i mongoose
+////////////////////////////
+Controller and Routes:
+src\controllers\healthcheck.controllers.js
+src\routes\healthcheck.routes.js
+src\app.js
+////////////////////////////////////

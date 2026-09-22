@@ -43,6 +43,9 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 // For example, public/logo.png is available at http://localhost:3000/logo.png
 app.use(express.static("public"));
 
+import healthcheckRouter from "./routes/healthcheck.routes.js";
+app.use("/api/v1/healthcheck", healthcheckRouter);
+
 app.get("/", (req, res) => {
     res.send("Hello from Express with ES modules!");
 });
