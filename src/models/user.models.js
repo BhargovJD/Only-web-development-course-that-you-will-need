@@ -1,6 +1,7 @@
 // Import mongoose.
 // mongoose helps Node.js connect to MongoDB and work with MongoDB data.
 import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 // Create a Mongoose schema for the User document.
 // A schema defines the structure and rules of user data in MongoDB.
@@ -148,6 +149,36 @@ const userSchema = new Schema(
         timestamps: true,
     },
 );
+
+// Pre-save hook.
+// This function will run automatically BEFORE a User document is saved
+// to MongoDB.
+userSchema.pre("save", async function (next) {
+    // Check whether the password field has been modified.
+    //
+    // this = the current User document.
+    //
+    // If the password has NOT been modified, there is no need to hash it again.
+    // next() tells Mongoose to continue with the save operation.
+    if (!this.isModified("password")) return next();
+
+    // Hash the user's password using bcrypt.
+    //
+    // this.password = the current password.
+    //
+    // bcrypt.hash(this.password, 10):
+    //   - this.password = plain-text password
+    //   - 10 = salt rounds (cost factor)
+    //
+    // await waits until bcrypt finishes hashing the password.
+    //
+    // The hashed password is then stored back in this.password.
+    this.password = await bcrypt.hash(this.password, 10);
+
+    // Tell Mongoose that the pre-save work is finished.
+    // Mongoose can now continue and save the document.
+    next();
+});
 
 // Create a Mongoose model named "user" using userSchema.
 // This model is used to create, read, update and delete users

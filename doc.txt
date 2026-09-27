@@ -36,3 +36,26 @@ src\routes\healthcheck.routes.js
 src\app.js
 http://localhost:8000/api/v1/healthcheck
 ////////////////////////////////////
+File	                             Job
+healthcheck.routes.js	             Which URL goes to which controller?
+healthcheck.controllers.js	         What should happen when the URL is called?
+async-handler.js	                 What should happen if the async controller gets an error?
+api-response.js	                     How should we structure our API response?
+
+                 REQUEST
+                    ↓
+          healthcheck.routes.js
+             "Who handles it?"
+                    ↓
+       healthcheck.controllers.js
+             "What to do?"
+                    ↓
+            async-handler.js
+             "Catch errors"
+                    ↓
+             api-response.js
+             "Format response"
+                    ↓
+                 RESPONSE
+/////////////////////////////////////////////
+npm i bcrypt
