@@ -180,6 +180,11 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
+// method
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
+
 // Create a Mongoose model named "user" using userSchema.
 // This model is used to create, read, update and delete users
 // in the MongoDB database.
