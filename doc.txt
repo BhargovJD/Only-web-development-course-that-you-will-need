@@ -63,4 +63,6 @@ npm i bcrypt
 $ npm install jsonwebtoken
 ///////////////////////////
 npm install mailgen --save
-
+////////////////////////////
+https://mailtrap.io/
+npm i nodemailer
