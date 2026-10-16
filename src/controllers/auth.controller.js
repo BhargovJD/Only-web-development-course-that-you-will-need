@@ -123,5 +123,74 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+
+const loginUser = asyncHandler(async (req, res) => {
+
+    // Extracts the email and password sent by the client in the request body.
+    const { email, password } = req.body;
+
+    // Searches the database for a user with the provided email address.
+    const user = await User.findOne({ email });
+
+    // Returns a generic error if the email does not match any user.
+    // Using the same message for email and password errors avoids revealing which is incorrect.
+    if (!user) {
+        throw new ApiError(401, "Invalid email or password");
+    }
+
+    // Checks whether the submitted password matches the user's stored hashed password.
+    // This method should be defined in your User model.
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+    // Rejects the login if the password is incorrect.
+    if (!isPasswordCorrect) {
+        throw new ApiError(401, "Invalid email or password");
+    }
+
+    // Prevents users from logging in until they have verified their email.
+    // Include this check if email verification is mandatory in your application.
+    if (!user.isEmailVerified) {
+        throw new ApiError(403, "Please verify your email before logging in");
+    }
+
+    // Generates a new access token and refresh token for the authenticated user.
+    // The helper also saves the refresh token in the database.
+    const { accessToken, refreshToken } =
+        await generateAccessAndRefreshToken(user._id);
+
+    // Retrieves the updated user document while excluding sensitive fields.
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshTokens -emailVerificationToken -emailVerificationTokenExpiry"
+    );
+
+    // Ensures the user document was successfully retrieved.
+    if (!loggedInUser) {
+        throw new ApiError(500, "Failed to login user");
+    }
+
+    // Configures cookie security options.
+    const options = {
+        httpOnly: true, // Prevents client-side JavaScript from reading these cookies.
+        secure: process.env.NODE_ENV === "production", // Requires HTTPS in production; allows HTTP during local development.
+        sameSite: "lax" // Helps protect against cross-site request forgery in common navigation scenarios.
+    };
+
+    // Sends an HTTP 200 response, sets both tokens as cookies,
+    // and returns the user details and tokens in the JSON response.
+    return res
+        .status(200)
+        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .json(
+            new ApiResponse(200, "Login successful", {
+                user: loggedInUser,
+                accessToken,
+                refreshToken,
+                message: "Login successful"
+            })
+        );
+});
+
+
 // Exports the functions so that routes can use them.
-export { registerUser };
+export { registerUser, loginUser };

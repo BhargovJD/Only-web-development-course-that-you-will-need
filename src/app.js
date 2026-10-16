@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 // Serve static files (images, CSS, HTML, etc.) from the "public" folder.
 // For example, public/logo.png is available at http://localhost:3000/logo.png
 app.use(express.static("public"));
+app.use(cookieParser());
 
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import authRouter from "./routes/auth.routes.js";
