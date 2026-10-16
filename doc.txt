@@ -59,3 +59,5 @@ api-response.js	                     How should we structure our API response?
                  RESPONSE
 /////////////////////////////////////////////
 npm i bcrypt
+//////////////////////////
+$ npm install jsonwebtoken

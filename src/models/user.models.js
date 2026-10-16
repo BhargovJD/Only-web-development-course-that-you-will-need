@@ -2,6 +2,8 @@
 // mongoose helps Node.js connect to MongoDB and work with MongoDB data.
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 // Create a Mongoose schema for the User document.
 // A schema defines the structure and rules of user data in MongoDB.
@@ -185,6 +187,72 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
 
+// Method to generate an access token for the logged-in user
+userSchema.methods.generateAccessToken = function () {
+
+    // Create the data (payload) that will be stored inside the JWT
+    const payload = {
+        userId: this._id,  // MongoDB ID of the current user
+        email: this.email, // Email address of the current user
+    };
+
+    // Get the secret key from the environment variables
+    // This key is used to sign the JWT securely
+    const secret = process.env.ACCESS_TOKEN_SECRET;
+
+    // Get the access token's expiration time from environment variables
+    // Example: "15m" means the token expires after 15 minutes
+    const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN;
+
+    // Generate and return the signed JWT
+    // The third argument must be an options object containing expiresIn
+    return jwt.sign(payload, secret, { expiresIn });
+};
+
+
+// Method to generate a refresh token for the logged-in user
+userSchema.methods.generateRefreshToken = function () {
+
+    // Create the payload containing the user's ID and email
+    const payload = {
+        userId: this._id,  // Unique ID of the current user
+        email: this.email, // Email address of the current user
+    };
+
+    // Get the refresh token's secret key from environment variables
+    const secret = process.env.REFRESH_TOKEN_SECRET;
+
+    // Get the refresh token's expiration time from environment variables
+    // Example: "7d" means the token expires after 7 days
+    const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN;
+
+    // Generate and return the signed refresh token
+    return jwt.sign(payload, secret, { expiresIn });
+};
+
+
+// Method to generate a temporary token
+// Commonly used for email verification, password resets, or similar tasks
+userSchema.methods.generateTemporaryToken = function () {
+
+    // Generate 32 cryptographically secure random bytes
+    // Convert those bytes into a 64-character hexadecimal string
+    const unHashedToken = crypto.randomBytes(32).toString("hex");
+
+    // Hash the original token using SHA-256
+    // Store the hash in the database instead of the original token
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(unHashedToken)
+        .digest("hex");
+
+    // Set the token's expiration time to 2 minutes from now
+    const tokenExpiry = Date.now() + (2 * 60 * 1000); // 2 minutes in milliseconds
+
+    // Return the original token, its hash, and its expiry timestamp
+    // Send unHashedToken to the user; store hashedToken and tokenExpiry in the database
+    return { unHashedToken, hashedToken, tokenExpiry };
+};
 // Create a Mongoose model named "user" using userSchema.
 // This model is used to create, read, update and delete users
 // in the MongoDB database.
