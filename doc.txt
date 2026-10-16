@@ -61,3 +61,6 @@ api-response.js	                     How should we structure our API response?
 npm i bcrypt
 //////////////////////////
 $ npm install jsonwebtoken
+///////////////////////////
+npm install mailgen --save
+
