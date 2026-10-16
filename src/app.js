@@ -54,4 +54,16 @@ app.get("/", (req, res) => {
     res.send("Hello from Express with ES modules!");
 });
 
+// Global error handler. Must have 4 parameters so Express treats it as error middleware.
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+
+    return res.status(statusCode).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+        errors: err.errors || [],
+        data: err.data ?? null,
+    });
+});
+
 export default app;

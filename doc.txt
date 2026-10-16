@@ -66,3 +66,12 @@ npm install mailgen --save
 ////////////////////////////
 https://mailtrap.io/
 npm i nodemailer
+///////////////
+http://localhost:8000/api/v1/auth/register
+{
+  "email":"abc1@gmail.com",
+  "userName":"bhargov1",
+  "password":"pass"
+}
+/////////////////////////////////////
+npm install express-validator
