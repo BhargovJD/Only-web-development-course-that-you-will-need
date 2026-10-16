@@ -12,7 +12,7 @@ const emailVerificationEmailGenerator = (email, verificationToken,link) => {
                 button: {
                     color: "#22BC66",
                     text: "Verify your account",
-                    link: verificationToken,
+                    link: link,
                 },
             },
             outro: "Need help, or have questions? Just reply to this email, we'd love to help you.",
@@ -39,4 +39,6 @@ const forgotPasswordEmailGenerator = (email, resetPasswordToken,link) => {
         subject: "Reset your password",
     }
 };
+
+export { emailVerificationEmailGenerator, forgotPasswordEmailGenerator };
 
