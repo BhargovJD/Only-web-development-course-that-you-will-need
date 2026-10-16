@@ -149,9 +149,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // Prevents users from logging in until they have verified their email.
     // Include this check if email verification is mandatory in your application.
-    if (!user.isEmailVerified) {
-        throw new ApiError(403, "Please verify your email before logging in");
-    }
+    // if (!user.isEmailVerified) {
+    //     throw new ApiError(403, "Please verify your email before logging in");
+    // }
 
     // Generates a new access token and refresh token for the authenticated user.
     // The helper also saves the refresh token in the database.

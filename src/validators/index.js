@@ -23,4 +23,16 @@ const userRegisterValidator = [
         .withMessage("Invalid password"),
 ];
 
-export { userRegisterValidator };
+
+const userLoginValidator = [
+    body("email")
+        .trim()
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Invalid email address")
+        .toLowerCase(),
+    body("password")
+];
+
+export { userRegisterValidator, userLoginValidator };
