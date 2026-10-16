@@ -155,14 +155,14 @@ const userSchema = new Schema(
 // Pre-save hook.
 // This function will run automatically BEFORE a User document is saved
 // to MongoDB.
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
     // Check whether the password field has been modified.
     //
     // this = the current User document.
     //
     // If the password has NOT been modified, there is no need to hash it again.
-    // next() tells Mongoose to continue with the save operation.
-    if (!this.isModified("password")) return next();
+    // Returning ends this async hook; Mongoose then continues the save.
+    if (!this.isModified("password")) return;
 
     // Hash the user's password using bcrypt.
     //
@@ -176,10 +176,6 @@ userSchema.pre("save", async function (next) {
     //
     // The hashed password is then stored back in this.password.
     this.password = await bcrypt.hash(this.password, 10);
-
-    // Tell Mongoose that the pre-save work is finished.
-    // Mongoose can now continue and save the document.
-    next();
 });
 
 // method

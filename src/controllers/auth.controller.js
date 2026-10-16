@@ -1,10 +1,9 @@
 
-import User from "../models/User.js"; // Imports the User model to interact with the users collection.
-import ApiResponse from "../utils/apiResponse.js"; // Imports the standard API success response class.
-import ApiError from "../utils/apiError.js"; // Imports the custom API error class.
-import asyncHandler from "express-async-handler"; // Automatically forwards async errors to Express error middleware.
-import sendEmail from "../utils/sendEmail.js"; // Imports the utility used to send emails.
-import { emailVerificationMailgenContent } from "../utils/emailTemplates.js"; // Imports the email verification template. Adjust the path/name to match your project.
+import { User } from "../models/user.models.js"; // Imports the User model to interact with the users collection.
+import { ApiResponse } from "../utils/api-response.js"; // Imports the standard API success response class.
+import { ApiError } from "../utils/api-error.js"; // Imports the custom API error class.
+import { asyncHandler } from "../utils/async-handler.js"; // Automatically forwards async errors to Express error middleware.
+import { sendEmail, emailVerificationEmailGenerator } from "../utils/mail.js"; // Imports the email sender and verification template.
 
 // Generates an access token and a refresh token for a given user.
 const generateAccessAndRefreshToken = async (userId) => {
@@ -48,8 +47,8 @@ const generateAccessAndRefreshToken = async (userId) => {
 // Handles user registration requests.
 const registerUser = asyncHandler(async (req, res) => {
 
-    // Extracts the user's name, email, and password from the request body.
-    const { name, email, password } = req.body;
+    // Extracts the fields expected by the User schema from the request body.
+    const { userName, email, password } = req.body;
 
     // Checks whether a user with the same email already exists.
     const existingUser = await User.findOne({ email });
@@ -63,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // The password should be hashed by a pre-save hook in the User model.
     // Email verification is initially marked as incomplete.
     const user = await User.create({
-        name,
+        userName,
         email,
         password,
         isEmailVerified: false
@@ -94,8 +93,9 @@ const registerUser = asyncHandler(async (req, res) => {
     await sendEmail({
         email: user.email,
         subject: "Please verify your email",
-        mailgenContent: emailVerificationMailgenContent(
-            user.username ?? user.name,
+        mailgenContent: emailVerificationEmailGenerator(
+            user.email,
+            unHashedToken,
             verificationURL
         )
     });

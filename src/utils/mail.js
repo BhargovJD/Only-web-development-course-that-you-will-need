@@ -1,4 +1,5 @@
-import mailgen from "mailgen";
+import Mailgen from "mailgen";
+import nodemailer from "nodemailer";
 
 
 const sendEmail = async (options) => {
