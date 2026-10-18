@@ -202,5 +202,230 @@ return res.status(200).clearCookie("refreshToken", options).clearCookie("accessT
 });
 
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+
+    // req.user contains the authenticated user's information.
+    // It is populated by the verifyJWT middleware.
+    
+    // Return HTTP 200 with the user's details and a success message.
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Current user fetched successfully",
+            req.user
+        )
+    );
+});
+
+// Controller to verify a user's email address
+const verifyEmail = asyncHandler(async (req, res) => {
+
+    // Extract the verification token from the URL parameters.
+    // Example URL: /verify-email/abc123xyz
+    const { verificationToken } = req.params;
+
+    // If the token is missing, return a 400 Bad Request error.
+    if (!verificationToken) {
+        throw new ApiError(
+            400,
+            "Email verification token is required"
+        );
+    }
+
+    // Hash the token received from the user using SHA-256.
+    // This must match the hashing method used when the token was generated.
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(verificationToken)
+        .digest("hex");
+
+    // Find the user whose stored verification token matches the hash.
+    // Also check that the token's expiry time is still in the future.
+    const user = await User.findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationExpiry: { $gt: Date.now() }
+    });
+
+    // If no matching user is found, the token is invalid or expired.
+    if (!user) {
+        throw new ApiError(
+            400,
+            "Invalid or expired verification token"
+        );
+    }
+
+    // Remove the verification token so it cannot be reused.
+    user.emailVerificationToken = undefined;
+
+    // Remove the token's expiry time as it is no longer needed.
+    user.emailVerificationExpiry = undefined;
+
+    // Mark the user's email address as verified.
+    user.isEmailVerified = true;
+
+    // Save the changes to MongoDB.
+    // Validation is skipped because we are updating verification fields.
+    await user.save({ validateBeforeSave: false });
+
+    // Send a successful response to the client.
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Email verified successfully",
+            {
+                isEmailVerified: true,
+                message: "Email verified successfully"
+            }
+        )
+    );
+});
+
+
+
+const resendEmailVerification = asyncHandler(async (req, res) => {
+
+    // Find the logged-in user using the ID set by verifyJWT middleware.
+    const user = await User.findById(req.user._id);
+
+    // If the user does not exist, return a 404 Not Found error.
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // If the email is already verified, there is no need to resend verification.
+    // HTTP 409 indicates a conflict with the current resource state.
+    if (user.isEmailVerified) {
+        throw new ApiError(409, "Email already verified");
+    }
+
+    // Generate a new temporary verification token.
+    // unHashedToken: original token sent to the user's email.
+    // hashedToken: hash stored in the database.
+    // tokenExpiry: expiration time of the token.
+    const { unHashedToken, hashedToken, tokenExpiry } =
+        user.generateTemporaryToken();
+
+    // Store the hashed verification token in the user document.
+    user.emailVerificationToken = hashedToken;
+
+    // Store the token's expiration time.
+    user.emailVerificationExpiry = tokenExpiry;
+
+    // Save the new token and expiry in MongoDB.
+    // This option skips Mongoose validation; use it only if necessary.
+    await user.save({ validateBeforeSave: false });
+
+    // Send the verification email to the user's email address.
+    await sendEmail({
+        email: user.email,
+
+        // Subject displayed in the recipient's email inbox.
+        subject: "Please verify your email",
+
+        // Generate the email body with the user's name and verification link.
+        mailgenContent: emailVerificationMailGenerator(
+            user.userName,
+
+            // Construct the verification URL using the request protocol,
+            // host, API route, and original verification token.
+            `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unHashedToken}`
+        )
+    });
+
+    // Return HTTP 200 if the email-sending operation completes successfully.
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Email verification sent successfully",
+            {
+                message: "Email verification sent successfully"
+            }
+        )
+    );
+});
+
+
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+
+    // Get the refresh token from the cookie first.
+    // If the cookie is unavailable, check the request body.
+    const incomingRefreshToken =
+        req.cookies?.refreshToken || req.body?.refreshToken;
+
+    // Reject the request if the client did not provide a refresh token.
+    if (!incomingRefreshToken) {
+        throw new ApiError(
+            401,
+            "Refresh token is required. Unauthorized access."
+        );
+    }
+
+    let decodedToken;
+
+    try {
+        // Verify the refresh token using the refresh token secret.
+        // This checks the token's signature and expiration.
+        decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        );
+    } catch (error) {
+        // Handle invalid, expired, or incorrectly signed JWTs.
+        throw new ApiError(
+            401,
+            "Invalid or expired refresh token."
+        );
+    }
+
+    // Find the user whose ID is stored in the decoded JWT payload.
+    const user = await User.findById(decodedToken._id);
+
+    // Reject the request if the user does not exist.
+    if (!user) {
+        throw new ApiError(
+            401,
+            "User not found. Invalid refresh token."
+        );
+    }
+
+    // Compare the incoming token with the refresh token stored in MongoDB.
+    // Use refreshToken (singular), assuming that is your schema field.
+    // This prevents an old or replaced refresh token from being reused.
+    if (incomingRefreshToken !== user.refreshToken) {
+        throw new ApiError(
+            401,
+            "Refresh token is invalid. Unauthorized access."
+        );
+    }
+
+    // Configure the authentication cookies.
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+
+    // Generate a new access token and rotate the refresh token.
+    // Assumption: this helper also saves the new refresh token to MongoDB.
+    const { accessToken, refreshToken } =
+        await generateAccessAndRefreshToken(user._id);
+
+    // Send the new tokens through HTTP-only cookies.
+    // The browser stores them for subsequent authenticated requests.
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                "Access token refreshed successfully",
+                { accessToken }
+            )
+        );
+});
+
+
+
 // Exports the functions so that routes can use them.
-export { registerUser, loginUser, logoutUser };
+export { registerUser, loginUser, logoutUse, getCurrentUser, verifyEmail };
