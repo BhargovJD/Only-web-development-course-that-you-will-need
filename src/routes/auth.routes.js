@@ -3,11 +3,12 @@ import { Router } from "express";
 import { userRegisterValidator, userLoginValidator } from "../validators/index.js";
 
 import { validateRequest } from "../middlewares/validator.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 // Imports the registerUser controller that handles user registration logic.
 import { registerUser } from "../controllers/auth.controller.js";
 import { loginUser } from "../controllers/auth.controller.js";
-
+import { logoutUser } from "../controllers/auth.controller.js";
 // Creates a new Express router instance.
 const router = Router();
 
@@ -15,6 +16,7 @@ const router = Router();
 // When a POST request reaches this route, registerUser executes.
 router.route("/register").post(userRegisterValidator, validateRequest, registerUser);
 router.route("/login").post(userLoginValidator, validateRequest, loginUser);
+router.route("/logout").post(verifyJWT, logoutUser);
 
 // Exports the router so it can be imported and mounted in the main Express application.
 export default router;

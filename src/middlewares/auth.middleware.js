@@ -1,8 +1,8 @@
 
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.models";
-import { asyncHandler } from "../utils/async-handler";
-import { ApiError } from "../utils/api-error";
+import { User } from "../models/user.models.js";
+import { asyncHandler } from "../utils/async-handler.js";
+import { ApiError } from "../utils/api-error.js";
 
 // Middleware to verify the JWT access token
 export const verifyJWT = asyncHandler(async (req, res, next) => {
@@ -35,7 +35,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     // Find the user whose MongoDB ID is stored in the JWT payload.
     // Exclude sensitive fields from the returned user document.
-    const user = await User.findById(decodedToken?._id)
+    const user = await User.findById(decodedToken?.userId)
         .select(
             "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
         );
