@@ -1,9 +1,19 @@
 
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { User } from "../models/user.models.js"; // Imports the User model to interact with the users collection.
 import { ApiResponse } from "../utils/api-response.js"; // Imports the standard API success response class.
 import { ApiError } from "../utils/api-error.js"; // Imports the custom API error class.
 import { asyncHandler } from "../utils/async-handler.js"; // Automatically forwards async errors to Express error middleware.
-import { sendEmail, emailVerificationEmailGenerator } from "../utils/mail.js"; // Imports the email sender and verification template.
+import { sendEmail, emailVerificationEmailGenerator, forgotPasswordEmailGenerator } from "../utils/mail.js"; // Imports the email sender and verification template.
+
+// Cookies that hold the access and refresh tokens.
+// secure is false during local HTTP development and true in production.
+const getAuthCookieOptions = () => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+});
 
 // Generates an access token and a refresh token for a given user.
 const generateAccessAndRefreshToken = async (userId) => {
@@ -23,8 +33,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         const refreshToken = user.generateRefreshToken();
 
         // Stores the refresh token in the user's database document.
-        // Confirm whether your schema expects a string or an array.
-        user.refreshTokens = refreshToken;
+        user.refreshToken = refreshToken;
 
         // Saves the updated user without running schema validation.
         // This option is useful when updating token fields only.
@@ -50,12 +59,18 @@ const registerUser = asyncHandler(async (req, res) => {
     // Extracts the fields expected by the User schema from the request body.
     const { userName, email, password } = req.body;
 
-    // Checks whether a user with the same email already exists.
-    const existingUser = await User.findOne({ email });
+    // Checks whether a user with the same email or username already exists.
+    const existingUser = await User.findOne({
+        $or: [{ email }, { userName }],
+    });
 
-    // Prevents duplicate registration using the same email address.
+    // Prevents duplicate registration using the same email address or username.
     if (existingUser) {
-        throw new ApiError(409, "User with this email already exists");
+        if (existingUser.email === email) {
+            throw new ApiError(409, "User with this email already exists");
+        }
+
+        throw new ApiError(409, "Username is already taken");
     }
 
     // Creates a new user in the database.
@@ -80,14 +95,14 @@ const registerUser = asyncHandler(async (req, res) => {
     user.emailVerificationToken = hashedToken;
 
     // Sets the expiration time after which the token is no longer valid.
-    user.emailVerificationTokenExpiry = tokenExpiry;
+    user.emailVerificationExpiry = tokenExpiry;
 
     // Saves the verification details without rerunning schema validation.
     await user.save({ validateBeforeSave: false });
 
     // Builds the verification URL using the current protocol and host.
     const verificationURL =
-        `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email?verify-email-token=${unHashedToken}`;
+        `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unHashedToken}`;
 
     // Sends the email containing the verification link.
     await sendEmail({
@@ -102,7 +117,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Retrieves the newly created user while excluding sensitive fields.
     const createdUser = await User.findById(user._id).select(
-        "-password -refreshTokens -emailVerificationToken -emailVerificationTokenExpiry"
+        "-password -refreshToken -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry"
     );
 
     // Ensures that the user was successfully retrieved.
@@ -160,7 +175,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // Retrieves the updated user document while excluding sensitive fields.
     const loggedInUser = await User.findById(user._id).select(
-        "-password -refreshTokens -emailVerificationToken -emailVerificationTokenExpiry"
+        "-password -refreshToken -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry"
     );
 
     // Ensures the user document was successfully retrieved.
@@ -169,11 +184,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // Configures cookie security options.
-    const options = {
-        httpOnly: true, // Prevents client-side JavaScript from reading these cookies.
-        secure: process.env.NODE_ENV === "production", // Requires HTTPS in production; allows HTTP during local development.
-        sameSite: "lax" // Helps protect against cross-site request forgery in common navigation scenarios.
-    };
+    const options = getAuthCookieOptions();
 
     // Sends an HTTP 200 response, sets both tokens as cookies,
     // and returns the user details and tokens in the JSON response.
@@ -192,11 +203,8 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-await User.findByIdAndUpdate(req.user._id, {$set: {refreshToken: ""}}, {new: true});
-const options = {
-    httpOnly: true,
-    secure: true,
-};
+await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: "" } });
+const options = getAuthCookieOptions();
 
 return res.status(200).clearCookie("refreshToken", options).clearCookie("accessToken", options).json(new ApiResponse(200, "Logout successful", { message: "Logout successful" }));
 });
@@ -323,8 +331,9 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
         subject: "Please verify your email",
 
         // Generate the email body with the user's name and verification link.
-        mailgenContent: emailVerificationMailGenerator(
+        mailgenContent: emailVerificationEmailGenerator(
             user.userName,
+            unHashedToken,
 
             // Construct the verification URL using the request protocol,
             // host, API route, and original verification token.
@@ -379,7 +388,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     // Find the user whose ID is stored in the decoded JWT payload.
-    const user = await User.findById(decodedToken._id);
+    const user = await User.findById(decodedToken.userId);
 
     // Reject the request if the user does not exist.
     if (!user) {
@@ -400,10 +409,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     // Configure the authentication cookies.
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
+    const options = getAuthCookieOptions();
 
     // Generate a new access token and rotate the refresh token.
     // Assumption: this helper also saves the new refresh token to MongoDB.
@@ -471,8 +477,9 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
         // Generate the email content with the user's name
         // and a link containing the original, unhashed token
-        mailgenContent: forgotPasswordMailgenContent(
+        mailgenContent: forgotPasswordEmailGenerator(
             user.userName,
+            unHashedToken,
             `${process.env.FORGOT_PASSWORD_URL}/${unHashedToken}`
         )
     });
@@ -493,15 +500,16 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
 const resetForgotPassword = asyncHandler(async (req, res) => {
 
-    // Extract the new password from the request body
-    const { password } = req.body;
+    // Extract the new password from the request body.
+    // The reset validator accepts this value as newPassword.
+    const { newPassword } = req.body;
 
     // Extract the reset token from the URL parameters
     // Example URL: /reset-password/abc123xyz
     const { resetToken } = req.params;
 
     // Check whether the password was provided
-    if (!password) {
+    if (!newPassword) {
         throw new ApiError(400, "New password is required");
     }
 
@@ -531,10 +539,9 @@ const resetForgotPassword = asyncHandler(async (req, res) => {
     // Remove the token expiry time
     user.forgotPasswordExpiry = undefined;
 
-    // Update the user's password
-    // FIX: Use password, which was extracted from req.body
-    // Your User model should hash the password before saving
-    user.password = password;
+    // Update the user's password.
+    // The User model hashes the password in a pre-save hook.
+    user.password = newPassword;
 
     // Save the updated password and cleared token fields
     // Validation is disabled here, so use this option carefully
@@ -623,4 +630,15 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 
 // Exports the functions so that routes can use them.
-export { registerUser, loginUser, logoutUse, getCurrentUser, verifyEmail, forgotPasswordRequest, resetForgotPassword, changeCurrentPassword };
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    getCurrentUser,
+    verifyEmail,
+    resendEmailVerification,
+    refreshAccessToken,
+    forgotPasswordRequest,
+    resetForgotPassword,
+    changeCurrentPassword,
+};

@@ -1,11 +1,14 @@
 // Main entry point of the application. Light weight.
+// Load environment variables before importing the app. Static imports run
+// before this file's body, so app.js would otherwise read process.env too early.
 import dotenv from "dotenv";
-import app from "./app.js";
-import connectDB from "./db/index.js";
 
 dotenv.config({
     path: ".env",
 });
+
+const { default: app } = await import("./app.js");
+const { default: connectDB } = await import("./db/index.js");
 
 const PORT = process.env.PORT || 3000;
 

@@ -11,12 +11,9 @@ const healthCheck = asyncHandler(async (req, res) => {
     // json() sends the response in JSON format.
     // ApiResponse creates a standard/custom response structure.
     res.status(200).json(
-        // Create an ApiResponse object with:
         // 200 = HTTP status code
-        // { message: "Server is running..." } = response data
-        new ApiResponse(200, {
-            message: "Server is running...",
-        }),
+        // "Server is running..." = response message
+        new ApiResponse(200, "Server is running..."),
     );
 });
 
