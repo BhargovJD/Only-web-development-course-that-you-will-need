@@ -426,6 +426,201 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 
+const forgotPasswordRequest = asyncHandler(async (req, res) => {
+
+    // Extract the email address from the request body
+    const { email } = req.body;
+
+    // Check whether the user has provided an email address
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    // Search for a user whose email matches the provided email
+    const user = await User.findOne({ email });
+
+    // If no user is found, return a 404 error
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // Generate a temporary token for password reset
+    // unHashedToken: Original token that will be sent to the user
+    // hashedToken: Hashed version that will be stored in the database
+    // tokenExpiry: Time after which the token becomes invalid
+    const { unHashedToken, hashedToken, tokenExpiry } =
+        user.generateTemporaryToken();
+
+    // Store the hashed token in the user's database document
+    // We store the hash instead of the original token for security
+    user.forgotPasswordToken = hashedToken;
+
+    // Store the token's expiration time
+    user.forgotPasswordExpiry = tokenExpiry;
+
+    // Save the token and expiry without running Mongoose validation
+    // This is useful if unrelated required fields fail validation
+    await user.save({ validateBeforeSave: false });
+
+    // Send a password-reset email to the user's registered email
+    await sendEmail({
+        email: user.email,
+
+        // Subject displayed in the recipient's email inbox
+        subject: "Reset your password",
+
+        // Generate the email content with the user's name
+        // and a link containing the original, unhashed token
+        mailgenContent: forgotPasswordMailgenContent(
+            user.userName,
+            `${process.env.FORGOT_PASSWORD_URL}/${unHashedToken}`
+        )
+    });
+
+    // Return HTTP 200 to indicate that the email was sent successfully
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Password reset email sent successfully",
+            {
+                message: "Password reset email sent successfully"
+            }
+        )
+    );
+
+});
+
+
+const resetForgotPassword = asyncHandler(async (req, res) => {
+
+    // Extract the new password from the request body
+    const { password } = req.body;
+
+    // Extract the reset token from the URL parameters
+    // Example URL: /reset-password/abc123xyz
+    const { resetToken } = req.params;
+
+    // Check whether the password was provided
+    if (!password) {
+        throw new ApiError(400, "New password is required");
+    }
+
+    // Hash the token received from the user using SHA-256
+    // This must use the same hashing algorithm used when
+    // generating and storing the reset token
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    // Find a user whose stored reset token matches the hash
+    // $gt: Date.now() means the expiry time must be in the future
+    const user = await User.findOne({
+        forgotPasswordToken: hashedToken,
+        forgotPasswordExpiry: { $gt: Date.now() }
+    });
+
+    // If no matching user is found, the token is invalid or expired
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired reset token");
+    }
+
+    // Remove the reset token so it cannot be reused
+    user.forgotPasswordToken = undefined;
+
+    // Remove the token expiry time
+    user.forgotPasswordExpiry = undefined;
+
+    // Update the user's password
+    // FIX: Use password, which was extracted from req.body
+    // Your User model should hash the password before saving
+    user.password = password;
+
+    // Save the updated password and cleared token fields
+    // Validation is disabled here, so use this option carefully
+    await user.save({ validateBeforeSave: false });
+
+    // Send a success response to the frontend
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Password reset successfully",
+            {
+                message: "Password reset successfully"
+            }
+        )
+    );
+
+});
+
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+
+    // Extract the current password and new password from the request body
+    const { currentPassword, newPassword } = req.body;
+
+    // Check whether both passwords are provided
+    if (!currentPassword || !newPassword) {
+        throw new ApiError(
+            400,
+            "Current password and new password are required"
+        );
+    }
+
+    // Find the currently logged-in user using their ID
+    // req.user is generally populated by authentication middleware
+    const user = await User.findById(req.user?._id);
+
+    // If the user does not exist, return a 404 Not Found error
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // Verify whether the current password matches the stored password
+    // isPasswordCorrect() usually compares the supplied password
+    // with the hashed password stored in the database
+    const isPasswordValid =
+        await user.isPasswordCorrect(currentPassword);
+
+    // If the current password is incorrect, stop the operation
+    if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid old password");
+    }
+
+    // Prevent the user from setting the same password again
+    const isSamePassword =
+        await user.isPasswordCorrect(newPassword);
+
+    if (isSamePassword) {
+        throw new ApiError(
+            400,
+            "New password must be different from the current password"
+        );
+    }
+
+    // Assign the new password to the user's document
+    // The Mongoose pre-save hook should hash it before saving
+    user.password = newPassword;
+
+    // Save the updated password in the database
+    // Validation is disabled here; prefer normal validation
+    // if your schema permits it
+    await user.save({ validateBeforeSave: false });
+
+    // Return a success response after the password is changed
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Password changed successfully",
+            {
+                message: "Password changed successfully"
+            }
+        )
+    );
+});
+
+
+
 
 // Exports the functions so that routes can use them.
-export { registerUser, loginUser, logoutUse, getCurrentUser, verifyEmail };
+export { registerUser, loginUser, logoutUse, getCurrentUser, verifyEmail, forgotPasswordRequest, resetForgotPassword, changeCurrentPassword };
